@@ -4,12 +4,14 @@ import chisel3._
 import hardfloat._
 import config.Configs._
 
+class Compute_max_minpointIO extends Bundle {
+  val input_vec = Input(new Point)
+  val out_vec_min = Output(UInt(DATA_WIDTH.W))
+  val out_vec_max = Output(UInt(DATA_WIDTH.W))
+}
+
 class Compute_max_minpoint extends Module { // 组合逻辑
-  val io = IO(new Bundle {
-    val input_vec = Input(new Point)
-    val out_vec_min = Output(UInt(DATA_WIDTH.W))
-    val out_vec_max = Output(UInt(DATA_WIDTH.W))
-  })
+  val io = IO(new Compute_max_minpointIO)
 
   val F_cmp_le_x1 = Module(new Float_CMP_le)
   val F_cmp_le_xmin = Module(new Float_CMP_le)

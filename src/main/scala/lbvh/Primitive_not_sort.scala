@@ -1,3 +1,4 @@
+/*
 package lbvh
 
 import chisel3._
@@ -34,3 +35,4 @@ class Primitive_not_sort extends Module {
   io.output.before_sort_primitive.triangle := tri_mem.io.output
   io.output.before_sort_primitive.morton_code := tempMortonReg
 }
+ */

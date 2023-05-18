@@ -4,15 +4,17 @@ import chisel3._
 import hardfloat._
 import config.Configs._
 
-class Compute_bigger_bbox extends Module { // 组合逻辑
-  val io = IO(new Bundle {
-    val input = new Bundle {
-      val bbox1 = Input(new BoundingBox)
-      val bbox2 = Input(new BoundingBox)
-    }
+class Compute_bigger_bboxIO extends Bundle {
+  val input = new Bundle {
+    val bbox1 = Input(new BoundingBox)
+    val bbox2 = Input(new BoundingBox)
+  }
 
-    val out_update_bbox = Output(new BoundingBox)
-  })
+  val out_update_bbox = Output(new BoundingBox)
+}
+
+class Compute_bigger_bbox extends Module { // 组合逻辑
+  val io = IO(new Compute_bigger_bboxIO)
 
 //找到minx,maxx
   val minx = Module(new Float_CMP_le)

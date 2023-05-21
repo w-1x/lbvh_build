@@ -11,10 +11,8 @@ class Compute_centresIO extends Bundle {
   }
 
   val output = new Bundle {
-    val centres_and_valid = Output(new Bundle {
-      val centres = Output(new Point)
-      val valid = Output(Bool())
-    })
+    val centres = Output(new Point)
+    val valid = Output(Bool())
   }
 }
 
@@ -51,14 +49,14 @@ class Compute_centres extends Module { // 2周期
   float_adds(5).io.a := float_adds(2).io.out
   float_adds(5).io.b := temp_input_Reg(2)
 
-  io.output.centres_and_valid.centres.x := float_adds(3).io.out
-  io.output.centres_and_valid.centres.y := float_adds(4).io.out
-  io.output.centres_and_valid.centres.z := float_adds(5).io.out
+  io.output.centres.x := float_adds(3).io.out
+  io.output.centres.y := float_adds(4).io.out
+  io.output.centres.z := float_adds(5).io.out
 
-  when(io.input.triangle.tri_id === 1.U) { // stateReg 下个周期才会变true
+  when(io.input.triangle.id === 1.U) { // stateReg 下个周期才会变true
     stateReg := true.B
   }
 
-  io.output.centres_and_valid.valid := stateReg
+  io.output.valid := stateReg
 
 }

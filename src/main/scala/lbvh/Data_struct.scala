@@ -17,7 +17,7 @@ class Point extends Bundle {
 }
 
 class Triangle extends Bundle {
-  val tri_id = UInt(ADDR_WIDTH.W)
+  val id = UInt(ADDR_WIDTH.W)
   val point_0 = new Point
   val point_1 = new Point
   val point_2 = new Point
@@ -32,4 +32,9 @@ class Before_sort_primitive extends Bundle {
   val triangle = new Triangle
   val bbox = new BoundingBox
   val morton_code = UInt(Morton_WIDTH.W)
+}
+
+class Sorted_primitive extends Bundle {
+  val before_sort_primitive = new Before_sort_primitive
+  val indice = UInt(ADDR_WIDTH.W)
 }

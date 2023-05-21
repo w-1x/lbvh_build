@@ -19,11 +19,10 @@ class Compute_primitive_MortonIO extends Bundle {
   }
 
   val output = new Bundle {
-    val morton_code_and_tri_id_and_valid = Output(new Bundle {
-      val morton_code = Output(UInt(Morton_WIDTH.W))
-      val tri_id = Output(UInt(ADDR_WIDTH.W))
-      val valid = Output(Bool())
-    })
+    val morton_code = Output(UInt(Morton_WIDTH.W))
+    val id = Output(UInt(ADDR_WIDTH.W))
+    val valid = Output(Bool())
+
   }
 }
 
@@ -40,7 +39,9 @@ class Compute_primitive_Morton extends Module { // 第一个图元的morton码�
   }
 
   val outputReg = RegInit(0.U(ADDR_WIDTH.W))
-  val centresFifo = Module(new CombFifo(new Point, DEPTH))
+  val centresFifo = Module(
+    new CombFifo(new Point, DEPTH + 4)
+  ) // 这里队列取多大呢？从enq.valid = 3 到 deq.ready = 1+DEPTH +2+4 的时间如何计算？
 
   centresFifo.io.enq.bits := io.input.centres_and_valid.centres
   centresFifo.io.enq.valid := io.input.centres_and_valid.valid
@@ -90,17 +91,17 @@ class Compute_primitive_Morton extends Module { // 第一个图元的morton码�
     )
   }
 
-  io.output.morton_code_and_tri_id_and_valid.morton_code := Cat(out_1)
+  io.output.morton_code := Cat(out_1)
 
   when(centresFifo.io.deq.ready) { // output 等于多少就相当于ready之后过了多少个周期
     outputReg := outputReg + 1.U
   }
 
   when(outputReg >= 3.U) { // 3 = 队列输出之后数据进行一次加法，两次次乘法共需要三个周期
-    io.output.morton_code_and_tri_id_and_valid.valid := true.B
+    io.output.valid := true.B
   }.otherwise {
-    io.output.morton_code_and_tri_id_and_valid.valid := false.B
+    io.output.valid := false.B
   }
 
-  io.output.morton_code_and_tri_id_and_valid.tri_id := (outputReg - 3.U) % DEPTH.U
+  io.output.id := (outputReg - 3.U) % DEPTH.U
 }

@@ -10,7 +10,7 @@ class TopTest extends AnyFlatSpec with ChiselScalatestTester {
     test(new TOP)
       .withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
         dut.io.input.valid.poke(1)
-        dut.clock.step(50)
+        dut.clock.step(130)
       }
   }
 }

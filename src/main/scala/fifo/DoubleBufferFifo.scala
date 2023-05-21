@@ -6,7 +6,7 @@ import chisel3.util._
 
 class DoubleBufferFifo[T <: Data](gen: T, depth: Int)
     extends Fifo(gen: T, depth: Int) {
-  private class DoubleBuffer extends Module {
+  private class DoubleBuffer[T <: Data](gen: T) extends Module {
     val io = IO(new FifoIO(gen))
 
     val empty :: one :: two :: Nil = Enum(3)
@@ -48,7 +48,7 @@ class DoubleBufferFifo[T <: Data](gen: T, depth: Int)
   }
 
   private val buffers = Array.fill((depth + 1) / 2) {
-    Module(new DoubleBuffer())
+    Module(new DoubleBuffer(gen))
   }
 
   for (i <- 0 until (depth + 1) / 2 - 1) {

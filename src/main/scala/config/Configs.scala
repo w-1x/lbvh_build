@@ -9,9 +9,9 @@ object Configs {
   val ADDR_WIDTH = 32
   val Morton_WIDTH = 6
   val Morton_WIDTH_by_per_axis = 2
-  val bucket_count = 16
-  val node_count = 2 * DEPTH
-  val begin = node_count - DEPTH
-  val end = node_count
+  val Bucket_count = 64
+  val Node_count = 2 * DEPTH
+  val Begin = Node_count - DEPTH
+  val End = Node_count
 
 }

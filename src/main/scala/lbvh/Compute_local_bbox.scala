@@ -11,10 +11,8 @@ class Compute_local_bboxIO extends Bundle {
   }
 
   val output = new Bundle {
-    val bbox_and_tri_id = new Bundle {
-      val bbox = Output(new BoundingBox)
-      val tri_id = Output(UInt(ADDR_WIDTH.W))
-    }
+    val bbox = Output(new BoundingBox)
+    val id = Output(UInt(ADDR_WIDTH.W))
   }
 
 }
@@ -38,13 +36,13 @@ class Compute_local_bbox extends Module { // 组合逻辑，不需要时延
   point_computer(2).io.input_vec.y := io.input.triangle.point_1.z
   point_computer(2).io.input_vec.z := io.input.triangle.point_2.z
 
-  io.output.bbox_and_tri_id.bbox.maxPoint.x := point_computer(0).io.out_vec_max
-  io.output.bbox_and_tri_id.bbox.maxPoint.y := point_computer(1).io.out_vec_max
-  io.output.bbox_and_tri_id.bbox.maxPoint.z := point_computer(2).io.out_vec_max
+  io.output.bbox.maxPoint.x := point_computer(0).io.out_vec_max
+  io.output.bbox.maxPoint.y := point_computer(1).io.out_vec_max
+  io.output.bbox.maxPoint.z := point_computer(2).io.out_vec_max
 
-  io.output.bbox_and_tri_id.bbox.minPoint.x := point_computer(0).io.out_vec_min
-  io.output.bbox_and_tri_id.bbox.minPoint.y := point_computer(1).io.out_vec_min
-  io.output.bbox_and_tri_id.bbox.minPoint.z := point_computer(2).io.out_vec_min
+  io.output.bbox.minPoint.x := point_computer(0).io.out_vec_min
+  io.output.bbox.minPoint.y := point_computer(1).io.out_vec_min
+  io.output.bbox.minPoint.z := point_computer(2).io.out_vec_min
 
-  io.output.bbox_and_tri_id.tri_id := io.input.triangle.tri_id
+  io.output.id := io.input.triangle.id
 }

@@ -26,7 +26,7 @@ class Compute_primitive_MortonIO extends Bundle {
   }
 }
 
-class Compute_primitive_Morton extends Module { // 第一个图元的morton码需要花费1 + depth + 2 +5 + 1 + 1
+class Compute_primitive_Morton extends Module { // 该模块需要7个周期，第一个图元的morton码需要花费1 + depth + 1 + 5 + 1 + 1
 
   // 实现(centres - bbox.min)* grid_dim(也就是一个方向的morton码的最大值)
   //  /bbox(max - min)

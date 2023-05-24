@@ -20,6 +20,7 @@ class Sort_primitive_by_mortoncodeIO extends Bundle {
 }
 
 class Sort_primitive_by_mortoncode extends Module {
+
   // 目前只能计算6位morton码，也就是跑一下8个图元的例子验证一下逻辑
   val io = IO(new Sort_primitive_by_mortoncodeIO)
 
@@ -33,7 +34,7 @@ class Sort_primitive_by_mortoncode extends Module {
   ) // 求出处于该位置的图元的排序
   val out_orderReg = Reg(
     Vec(DEPTH, UInt(DATA_WIDTH.W))
-  ) // 输出morton码对应的图元的输入顺序即Sorted_primitive.indice
+  ) // 输出morton码对应的图元的输入顺序
 
   val outMortonREG = Reg(Vec(DEPTH, UInt(Morton_WIDTH.W))) // 交换morton顺序
   val outindiceREG = Reg(Vec(DEPTH, UInt(ADDR_WIDTH.W)))
@@ -44,42 +45,44 @@ class Sort_primitive_by_mortoncode extends Module {
     clock_count_reg := clock_count_reg + 1.U
     tempMortonReg(
       clock_count_reg
-    ) := io.input.morton_code // 初始化排序数据 需要DEPTH个周期
-    when(clock_count_reg === DEPTH.U) {
-      for (i <- 0 until (DEPTH))
-        bucketReg(tempMortonReg(i)) := bucketReg(
-          tempMortonReg(i)
-        ) + 1.U // 记录数据属于哪个桶
+    ) := io.input.morton_code // 初始化排序数据 需要DEPTH个周期,这里考虑边读数据边对bucketReg进行计算
+    when(clock_count_reg < DEPTH.U) {
+      bucketReg(io.input.morton_code) := bucketReg(io.input.morton_code) + 1.U
     }
 
-    when(clock_count_reg >= DEPTH.U + 1.U) { // 需要 Bucket_count个周期
-      add_bucketReg(0) := bucketReg(0) // 求出数据的位置
+    when(clock_count_reg >= DEPTH.U) { // 需要 Bucket_count个周期
+      add_bucketReg(0) := 0.U // 求出数据的位置
       for (i <- 1 until (Bucket_count)) {
-        add_bucketReg(i) := add_bucketReg(i - 1) + bucketReg(i)
+        add_bucketReg(i) := add_bucketReg(i - 1) + bucketReg(i - 1)
       }
     }
-    when(clock_count_reg === DEPTH.U + Bucket_count.U + 1.U) {
-      for (i <- 0 until (DEPTH)) { // 求出最终的排序,一个周期
-        out_orderReg(i) := add_bucketReg(tempMortonReg(i)) - 1.U
+
+    for (i <- 0 until (DEPTH)) { // 求出最后的排序，需要DEPTH个周期
+      when(clock_count_reg === DEPTH.U + Bucket_count.U + i.U) {
+        out_orderReg(i) := add_bucketReg(tempMortonReg(i))
+        add_bucketReg(tempMortonReg(i)) := add_bucketReg(tempMortonReg(i)) + 1.U
       }
     }
-    when(clock_count_reg === DEPTH.U + Bucket_count.U + 2.U) {
-      for (i <- 0 until (DEPTH)) {
+
+    for (i <- 0 until (DEPTH)) { // 缓存在输出buffer中,需要DEPTH个周期
+      when(clock_count_reg === DEPTH.U + Bucket_count.U + i.U + 1.U) {
         outMortonREG(out_orderReg(i)) := tempMortonReg(i)
         outindiceREG(out_orderReg(i)) := i.U
       }
     }
-    when(clock_count_reg >= DEPTH.U + Bucket_count.U + 2.U) {
+
+    when(clock_count_reg >= 2.U * DEPTH.U + Bucket_count.U + 2.U) {
       out_validReg := true.B
     }
   }
 
   io.output.indice := outindiceREG(
-    (clock_count_reg - DEPTH.U - Bucket_count.U - 3.U) % DEPTH.U
+    (clock_count_reg - (2.U * DEPTH.U + Bucket_count.U + 3.U)) % DEPTH.U
   )
 
   io.output.morton_code := outMortonREG(
-    (clock_count_reg - DEPTH.U - Bucket_count.U - 3.U) % DEPTH.U
+    (clock_count_reg - (2.U * DEPTH.U + Bucket_count.U + 3.U)) % DEPTH.U
   )
   io.output.valid := out_validReg
+
 }

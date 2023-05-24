@@ -38,3 +38,13 @@ class Sorted_primitive extends Bundle {
   val before_sort_primitive = new Before_sort_primitive
   val indice = UInt(ADDR_WIDTH.W)
 }
+
+class Node extends Bundle {
+  val node_id = UInt(ADDR_WIDTH.W)
+  val bbox = new BoundingBox
+  val primitive_count = UInt(ADDR_WIDTH.W)
+  val first_child_or_primitive = UInt(ADDR_WIDTH.W)
+  val level = UInt(ADDR_WIDTH.W)
+  val need_merge = Bool()
+  val merge_index = UInt(ADDR_WIDTH.W)
+}

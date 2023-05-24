@@ -17,12 +17,13 @@ class Compute_global_bboxIO extends Bundle {
   }
 }
 
-class Compute_global_bbox extends Module { // DEPTH + 1 + 1 个周期
+class Compute_global_bbox extends Module { // DEPTH + 1 个周期
   val io = IO(new Compute_global_bboxIO)
   val clock_count_reg = RegInit(0.U(DATA_WIDTH.W))
   clock_count_reg := clock_count_reg + 1.U
 
-  val tri_countReg = RegInit(false.B)
+  val tri_countReg1 = RegInit(false.B)
+  val tri_countReg2 = RegInit(false.B)
 
   val temp_bigger_bbox = Reg(new BoundingBox)
 
@@ -63,8 +64,10 @@ class Compute_global_bbox extends Module { // DEPTH + 1 + 1 个周期
   io.output.global_bbox.minPoint.y := mulity(3).io.actual.out
   io.output.global_bbox.minPoint.z := mulity(5).io.actual.out
 
-  when(io.input.id === DEPTH.U) { // temp 存在一个周期时延，乘法需要一个周期 ,tri_countReg下周期才变化
-    tri_countReg := true.B
+  when(io.input.id === DEPTH.U - 1.U) { // 乘法需要一个周期 ,tri_countReg下周期才变化
+    tri_countReg1 := true.B
   }
-  io.output.valid := tri_countReg
+  tri_countReg2 := tri_countReg1
+
+  io.output.valid := tri_countReg2
 }

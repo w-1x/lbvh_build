@@ -5,7 +5,7 @@ import chisel3.util.experimental._
 import chisel3.util._
 import config.Configs._
 
-class ReadTrianglesIO extends Bundle {
+class ReadTriangleIO extends Bundle {
   val input = new Bundle {
     val id = Input(UInt(ADDR_WIDTH.W))
   }
@@ -15,14 +15,17 @@ class ReadTrianglesIO extends Bundle {
   }
 }
 
-class ReadTriangles extends Module { // 单周期
-  val io = IO(new ReadTrianglesIO)
+class ReadTriangle extends Module { // 单周期
+  val io = IO(new ReadTriangleIO)
 
+  val idReg = RegInit(0.U(ADDR_WIDTH.W))
   val memory = SyncReadMem(DEPTH * 9, UInt(DATA_WIDTH.W))
 
   loadMemoryFromFile(memory, InputFileName)
 
-  io.output.triangle.id := io.input.id - 1.U // 存储模块有一个时延，所以输出地址比输入地址慢一拍
+  idReg := io.input.id % DEPTH.U
+
+  io.output.triangle.id := idReg // 存储模块有一个时延，所以输出地址比输入地址慢一拍
   io.output.triangle.point_0.x := memory.read(
     io.input.id * 9.U % (9.U * DEPTH.U) + 0.U
   )

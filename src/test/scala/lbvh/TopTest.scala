@@ -6,11 +6,11 @@ import chiseltest._
 import org.scalatest.flatspec.AnyFlatSpec
 
 class TopTest extends AnyFlatSpec with ChiselScalatestTester {
-  "Primitive_StoreTest" should "pass test" in {
+  "TOP1Test" should "pass test" in {
     test(new TOP)
       .withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
         dut.io.input.valid.poke(1)
-        dut.clock.step(130)
+        dut.clock.step(170)
       }
   }
 }

@@ -48,3 +48,18 @@ class Node extends Bundle {
   val need_merge = Bool()
   val merge_index = UInt(ADDR_WIDTH.W)
 }
+
+class In_Node extends Bundle {
+  val node = new Node
+  val next_begin = UInt(ADDR_WIDTH.W)
+  val next_end = UInt(ADDR_WIDTH.W)
+  val begin = UInt(ADDR_WIDTH.W)
+  val end = UInt(ADDR_WIDTH.W)
+  val valid = Bool()
+}
+
+class Out_Node extends Bundle {
+  val node = new Node
+  val next_begin = UInt(ADDR_WIDTH.W)
+  val next_end = UInt(ADDR_WIDTH.W)
+}

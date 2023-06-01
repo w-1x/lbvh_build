@@ -13,6 +13,7 @@ class CountIO extends Bundle {
 
   val output = new Bundle {
     val id = Output(UInt(ADDR_WIDTH.W))
+    val valid = Output(Bool())
   }
 }
 
@@ -24,4 +25,5 @@ class Count(addn: Int) extends Module { // 单周期
   }
 
   io.output.id := clock_count_reg
+  io.output.valid := io.input.valid
 }

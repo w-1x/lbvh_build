@@ -8,10 +8,12 @@ import config.Configs._
 class ReadTriangleIO extends Bundle {
   val input = new Bundle {
     val id = Input(UInt(ADDR_WIDTH.W))
+    val valid = Input(Bool())
   }
 
   val output = new Bundle {
     val triangle = Output(new Triangle)
+    val valid = Output(Bool())
   }
 }
 
@@ -20,11 +22,16 @@ class ReadTriangle extends Module { // 单周期
 
   val idReg = RegInit(0.U(ADDR_WIDTH.W))
   val memory = SyncReadMem(DEPTH * 9, UInt(DATA_WIDTH.W))
+  val validReg = RegInit(false.B)
 
   loadMemoryFromFile(memory, InputFileName)
+  when(io.input.valid) {
+    validReg := true.B
+  }
 
   idReg := io.input.id % DEPTH.U
 
+  io.output.valid := validReg
   io.output.triangle.id := idReg // 存储模块有一个时延，所以输出地址比输入地址慢一拍
   io.output.triangle.point_0.x := memory.read(
     io.input.id * 9.U % (9.U * DEPTH.U) + 0.U

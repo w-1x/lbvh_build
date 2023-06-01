@@ -8,6 +8,7 @@ import config.Configs._
 class Compute_centresIO extends Bundle {
   val input = new Bundle {
     val triangle = Input(new Triangle)
+    val valid = Input(Bool())
   }
 
   val output = new Bundle {
@@ -19,11 +20,23 @@ class Compute_centresIO extends Bundle {
 class Compute_centres extends Module { // 2周期
   val io = IO(new Compute_centresIO)
 
+  val clockaddstart = RegInit(false.B)
+  val out_valid = WireInit(false.B)
   val float_adds = Array.fill(6) {
     Module(new Float_Add)
   }
 
-  val stateReg = RegInit(false.B)
+  val clock_count_reg = RegInit(0.U(DATA_WIDTH.W)) // 时钟计数
+
+  when(io.input.valid) {
+    clockaddstart := true.B
+  }
+  when(clockaddstart || io.input.valid) {
+    clock_count_reg := clock_count_reg + 1.U
+  }
+  when(clock_count_reg >= 2.U) {
+    out_valid := true.B
+  }
 
   val temp_input_Reg = Reg(Vec(3, UInt(DATA_WIDTH.W)))
 
@@ -53,10 +66,6 @@ class Compute_centres extends Module { // 2周期
   io.output.centres.y := float_adds(4).io.out
   io.output.centres.z := float_adds(5).io.out
 
-  when(io.input.triangle.id === 1.U) { // stateReg 下个周期才会变true
-    stateReg := true.B
-  }
-
-  io.output.valid := stateReg
+  io.output.valid := out_valid
 
 }

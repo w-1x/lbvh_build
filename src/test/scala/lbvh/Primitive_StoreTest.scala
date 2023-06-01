@@ -8,7 +8,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 
 class Primitive_StoreTest extends AnyFlatSpec with ChiselScalatestTester {
   "Primitive_StoreTest" should "pass test" in {
-    test(new Primitive_Store)
+    test(new Create_leaves)
       .withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
         for (i <- 0 until (80)) {
           dut.io.input.valid.poke(0)

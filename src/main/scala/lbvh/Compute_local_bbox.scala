@@ -8,11 +8,13 @@ import config.Configs._
 class Compute_local_bboxIO extends Bundle {
   val input = new Bundle {
     val triangle = Input(new Triangle)
+    val valid = Input(Bool())
   }
 
   val output = new Bundle {
     val bbox = Output(new BoundingBox)
     val id = Output(UInt(ADDR_WIDTH.W))
+    val valid = Output(Bool())
   }
 
 }
@@ -45,4 +47,5 @@ class Compute_local_bbox extends Module { // 组合逻辑，不需要时延
   io.output.bbox.minPoint.z := point_computer(2).io.out_vec_min
 
   io.output.id := io.input.triangle.id
+  io.output.valid := io.input.valid
 }

@@ -11,12 +11,14 @@ class TOPIO extends Bundle {
     val valid = Input(Bool())
   }
 
-  val output = new Bundle {
+  val output1 = new Bundle {
     val node = Output(new Node)
     val valid = Output(Bool())
-    //   val triangle = Output(new Triangle)
   }
-
+  val output2 = new Bundle {
+    val node = Output(new Node)
+    val valid = Output(Bool())
+  }
   val count = Output(UInt(ADDR_WIDTH.W))
 }
 
@@ -31,8 +33,16 @@ class TOP extends Module {
   val compute_primitive_Morton = Module(new Compute_primitive_Morton)
 
   val sort_primitive_by_mortoncode = Module(new Sort_primitive_by_mortoncode)
-  val primitive_store = Module(new Primitive_Store)
-  // val primitive_not_sort_copy = Module(new Primitive_not_sort_copy)
+
+  val create_leaves = Module(new Create_leaves)
+  val compute_node_level = Module(new Compute_node_level)
+  val compute_need_and_merge = Module(new Compute_need_and_merge)
+  val init_node = Module(new Init_node)
+  val input_node = Module(new Input_node2)
+  val merge = Module(new Merge)
+  val output_node = Module(new Output_node)
+  val result = Module(new Result)
+  val new_comput_need_and_merge = Module(new New_comput_need_and_merge)
 
   val clock_count_reg = RegInit(0.U(DATA_WIDTH.W)) // 时钟计数
   clock_count_reg := clock_count_reg + 1.U
@@ -60,13 +70,37 @@ class TOP extends Module {
   sort_primitive_by_mortoncode.io.input <> compute_primitive_Morton.io.output
 
   // primitive_store in
-  primitive_store.io.input <> sort_primitive_by_mortoncode.io.output
-  printf(
-    "dut:clock = %d, indice = %d\n",
-    clock_count_reg,
-    primitive_store.io.input.indice
-  )
+  create_leaves.io.input <> sort_primitive_by_mortoncode.io.output
 
-  io.output <> primitive_store.io.leaves
+  // compute_node_level in
+  compute_node_level.io.input <> sort_primitive_by_mortoncode.io.output
+
+  // compute_need_and_merge in
+  compute_need_and_merge.io.input <> compute_node_level.io.output
+
+  // init_node in
+  init_node.io.input1 <> create_leaves.io.leaves
+  init_node.io.input2 <> compute_need_and_merge.io.output
+
+  // input_node in
+  input_node.io.input1 <> init_node.io.output
+  input_node.io.input2 <> new_comput_need_and_merge.io.output
+
+  // merge in
+  merge.io.input <> input_node.io.output
+
+  // output_node in
+  output_node.io.input <> merge.io.output
+
+  // result in
+  result.io.input2 <> output_node.io.output2
+  result.io.input3 <> output_node.io.output3
+
+  // new_comput_need_and_merge in
+  new_comput_need_and_merge.io.input <> output_node.io.output1
+
+  io.output1 <> result.io.output1
+  io.output2 <> result.io.output2
+
   io.count <> clock_count_reg
 }

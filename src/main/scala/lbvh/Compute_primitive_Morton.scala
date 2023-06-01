@@ -22,7 +22,6 @@ class Compute_primitive_MortonIO extends Bundle {
     val morton_code = Output(UInt(Morton_WIDTH.W))
     val id = Output(UInt(ADDR_WIDTH.W))
     val valid = Output(Bool())
-
   }
 }
 
@@ -97,7 +96,7 @@ class Compute_primitive_Morton extends Module { // 该模块需要7个周期，�
     outputReg := outputReg + 1.U
   }
 
-  when(outputReg >= 3.U) { // 3 = 队列输出之后数据进行一次加法，两次次乘法共需要三个周期
+  when(outputReg >= 3.U && outputReg <= 3.U + DEPTH.U - 1.U) { // 3 = 队列输出之后数据进行一次加法，两次次乘法共需要三个周期
     io.output.valid := true.B
   }.otherwise {
     io.output.valid := false.B

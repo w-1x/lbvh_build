@@ -9,6 +9,7 @@ class Compute_global_bboxIO extends Bundle {
   val input = new Bundle {
     val bbox = Input(new BoundingBox)
     val id = Input(UInt(ADDR_WIDTH.W))
+    val valid = Input(Bool())
   }
 
   val output = new Bundle {
@@ -19,11 +20,20 @@ class Compute_global_bboxIO extends Bundle {
 
 class Compute_global_bbox extends Module { // DEPTH + 1 个周期
   val io = IO(new Compute_global_bboxIO)
-  val clock_count_reg = RegInit(0.U(DATA_WIDTH.W))
-  clock_count_reg := clock_count_reg + 1.U
 
-  val tri_countReg1 = RegInit(false.B)
-  val tri_countReg2 = RegInit(false.B)
+  val clockaddstart = RegInit(false.B)
+  val out_valid = WireInit(false.B)
+  val clock_count_reg = RegInit(0.U(DATA_WIDTH.W))
+
+  when(io.input.valid) {
+    clockaddstart := true.B
+  }
+  when(clockaddstart || io.input.valid) {
+    clock_count_reg := clock_count_reg + 1.U
+  }
+  when(clock_count_reg >= 1.U + DEPTH.U) {
+    out_valid := true.B
+  }
 
   val temp_bigger_bbox = Reg(new BoundingBox)
 
@@ -32,9 +42,9 @@ class Compute_global_bbox extends Module { // DEPTH + 1 个周期
   compute_big_bbox.io.input.bbox2 := temp_bigger_bbox
 
   when(clock_count_reg === 0.U) {
-    temp_bigger_bbox := io.input.bbox
+    temp_bigger_bbox := io.input.bbox // clcok = 1 时，temp = io.input.bbox
   }.otherwise {
-    temp_bigger_bbox := compute_big_bbox.io.out_update_bbox
+    temp_bigger_bbox := compute_big_bbox.io.out_update_bbox // clock = n,temp = max前N
   }
 
   val mulity = Array.fill(6) {
@@ -64,10 +74,5 @@ class Compute_global_bbox extends Module { // DEPTH + 1 个周期
   io.output.global_bbox.minPoint.y := mulity(3).io.actual.out
   io.output.global_bbox.minPoint.z := mulity(5).io.actual.out
 
-  when(io.input.id === DEPTH.U - 1.U) { // 乘法需要一个周期 ,tri_countReg下周期才变化
-    tri_countReg1 := true.B
-  }
-  tri_countReg2 := tri_countReg1
-
-  io.output.valid := tri_countReg2
+  io.output.valid := out_valid
 }

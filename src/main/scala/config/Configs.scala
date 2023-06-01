@@ -8,11 +8,11 @@ object Configs {
   val DEPTH = 8
   val DATA_WIDTH = 32
   val ADDR_WIDTH = 32
-  val Morton_WIDTH = 6
-  val Morton_WIDTH_by_per_axis = 2
-  val Bucket_count = 64
+  val Morton_WIDTH = 30
+  val Morton_WIDTH_by_per_axis = 10
+  val Bucket_count = 1 << Morton_WIDTH
   val Node_count = 2 * DEPTH - 1
   val Begin = Node_count - DEPTH
   val End = Node_count
-
+  val MASK = (1 << 10) - 1
 }
